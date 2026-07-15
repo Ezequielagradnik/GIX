@@ -253,6 +253,49 @@ body {
   margin: 0;
 }
 
+/* ---- Fichas del problema (flip mecanico, mismo gesto que el
+        split-flap del hero) ---- */
+.pcard {
+  perspective: 1100px;
+}
+.pcard-inner {
+  position: relative;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.55s cubic-bezier(0.36, 0, 0.24, 1);
+}
+.pcard-flipped {
+  transform: rotateX(-180deg);
+}
+.pcard-face {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.pcard-back {
+  transform: rotateX(180deg);
+}
+
+/* ---- Ticker de mostrador (cinta que corre) ---- */
+.marquee {
+  overflow: hidden;
+}
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee-scroll 32s linear infinite;
+}
+.marquee:hover .marquee-track {
+  animation-play-state: paused;
+}
+@keyframes marquee-scroll {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
 /* ---- Sliders de la calculadora (register look) ---- */
 input[type="range"].reg-slider {
   -webkit-appearance: none;
