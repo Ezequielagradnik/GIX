@@ -1,4 +1,18 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
 import { Container, SectionLabel } from "./ui";
+
+/* ============================================================
+   § 03 CÓMO FUNCIONA — el turnero grande.
+   Un número gigante que gira mecánicamente (el gesto split-flap
+   de la marca) al pasar de paso: 01 -> 02 -> 03. Avanza solo,
+   con barra de progreso; tabs para saltar; hover pausa.
+   Cada paso trae su escena: el ticket del plan, el QR que se
+   imprime, la plata contando. Reduced-motion: quieto.
+   ============================================================ */
+
+const STEP_MS = 3200;
 
 const STEPS = [
   {
@@ -18,30 +32,222 @@ const STEPS = [
   },
 ];
 
+function usePrefersReducedMotion() {
+  const [reduced, setReduced] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setReduced(mq.matches);
+    const on = () => setReduced(mq.matches);
+    mq.addEventListener("change", on);
+    return () => mq.removeEventListener("change", on);
+  }, []);
+  return reduced;
+}
+
+/* ---- Escena 01: el ticket del plan ---- */
+function PlanTicket() {
+  return (
+    <div
+      className="ticket w-[250px]"
+      style={{ ["--z" as string]: "9px", paddingBlock: "calc(9px + 1rem)" }}
+    >
+      <p className="px-5 text-center font-display text-lg text-ink">GIX</p>
+      <p className="mt-0.5 px-5 pb-2 text-center font-mono text-[9px] uppercase tracking-[0.2em] text-slate">
+        Nuevo plan
+      </p>
+      <hr className="ticket-rule" />
+      {[
+        ["Plan", "Café Mensual"],
+        ["Precio", "$30.000/mes"],
+        ["Consumos", "30 cafés"],
+        ["Tope", "máx. 2 por día"],
+      ].map(([k, v]) => (
+        <div
+          key={k}
+          className="flex items-baseline justify-between px-5 py-1.5 font-mono text-[11px] text-ink"
+        >
+          <span className="text-slate">{k}</span>
+          <span className="font-semibold">{v}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/* ---- Escena 02: el QR que se imprime ---- */
+const QR_ROWS = [
+  "11111010111",
+  "10001001001",
+  "10111010101",
+  "10101110111",
+  "11111000100",
+  "00010110010",
+  "10110101110",
+  "00101011000",
+  "11111011010",
+  "10001010110",
+  "11101110101",
+];
+
+function QRPrint({ active }: { active: boolean }) {
+  return (
+    <div className="flex items-center gap-5">
+      <div className="grid w-fit grid-cols-11 gap-[2px] border border-chrome bg-[#f3f5f3] p-2.5">
+        {QR_ROWS.join("").split("").map((c, i) => (
+          <span
+            key={i}
+            className={`h-[8px] w-[8px] transition-opacity duration-150 ${
+              c === "1" ? "bg-ink" : "bg-transparent"
+            } ${active ? "opacity-100" : "opacity-0"}`}
+            style={{ transitionDelay: active ? `${(i % 11) * 22 + Math.floor(i / 11) * 30}ms` : "0ms" }}
+          />
+        ))}
+      </div>
+      <p className="max-w-[16ch] font-mono text-[11px] uppercase tracking-[0.15em] text-slate">
+        Pegalo en el mostrador y listo
+      </p>
+    </div>
+  );
+}
+
+/* ---- Escena 03: la plata contando ---- */
+function CountUp({ active, reduced }: { active: boolean; reduced: boolean }) {
+  const TARGET = 1_500_000;
+  const [v, setV] = useState(TARGET);
+
+  useEffect(() => {
+    if (!active || reduced) {
+      setV(TARGET);
+      return;
+    }
+    let start: number | null = null;
+    let raf = 0;
+    const dur = 1400;
+    const tick = (t: number) => {
+      if (start === null) start = t;
+      const p = Math.min(1, (t - start) / dur);
+      setV(Math.round(TARGET * (1 - Math.pow(1 - p, 3))));
+      if (p < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [active, reduced]);
+
+  return (
+    <div>
+      <p className="font-mono text-[clamp(2.2rem,5vw,3.4rem)] font-semibold leading-none tabular-nums text-stamp">
+        ${new Intl.NumberFormat("es-AR").format(v)}
+      </p>
+      <p className="mt-3 inline-block border border-ink px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.15em] text-ink">
+        Cobrado el 1 de cada mes
+      </p>
+    </div>
+  );
+}
+
 export function HowItWorks() {
+  const reduced = usePrefersReducedMotion();
+  const boardRef = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+  const [active, setActive] = useState(0);
+  const hovering = useRef(false);
+
+  useEffect(() => {
+    const el = boardRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisible(true);
+          io.disconnect();
+        }
+      },
+      { threshold: 0.25 }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!visible || reduced) return;
+    const id = window.setInterval(() => {
+      if (!hovering.current) setActive((a) => (a + 1) % STEPS.length);
+    }, STEP_MS);
+    return () => window.clearInterval(id);
+  }, [visible, reduced]);
+
+  const step = STEPS[active];
+
   return (
     <section className="border-b border-chrome py-16 sm:py-24">
       <Container>
         <SectionLabel index="§ 03">Cómo funciona</SectionLabel>
-        <ol className="mt-12 grid gap-px border border-chrome bg-chrome sm:grid-cols-3">
-          {STEPS.map((step) => (
-            <li key={step.n} className="flex flex-col bg-tile p-6 sm:p-8">
-              {/* Ticket de turno del deli: numero grande en mono, borde troquelado. */}
-              <span
-                className="mb-6 inline-flex w-fit items-baseline border border-ink px-3 py-1"
-                style={{ borderBottomStyle: "dashed" }}
+
+        <div
+          ref={boardRef}
+          onMouseEnter={() => (hovering.current = true)}
+          onMouseLeave={() => (hovering.current = false)}
+          className={`mt-12 grid border border-ink bg-tile transition-all duration-500 lg:grid-cols-[0.8fr_1.2fr] ${
+            visible ? "translate-y-0 opacity-100" : "translate-y-5 opacity-0"
+          }`}
+        >
+          {/* IZQUIERDA: el número de turno gigante + tabs */}
+          <div className="relative flex flex-col border-b border-chrome p-6 sm:p-8 lg:border-b-0 lg:border-r">
+            <span className="readout font-mono">Paso</span>
+            <div className="my-2 flex-1" style={{ perspective: "900px" }}>
+              <p
+                key={active}
+                className={`${reduced ? "" : "turn-flip"} font-mono text-[clamp(7rem,16vw,11rem)] font-semibold leading-none tabular-nums text-stamp`}
               >
-                <span className="font-mono text-3xl font-semibold text-ink tabular-nums">
-                  {step.n}
-                </span>
-              </span>
-              <h3 className="font-display text-2xl text-ink leading-tight">
+                {step.n}
+              </p>
+            </div>
+            <div className="flex items-center gap-2 pt-6">
+              {STEPS.map((s, i) => (
+                <button
+                  key={s.n}
+                  type="button"
+                  onClick={() => setActive(i)}
+                  aria-pressed={active === i}
+                  aria-label={`Paso ${s.n}: ${s.title}`}
+                  className={`border px-4 py-2 font-mono text-sm tabular-nums transition-colors ${
+                    active === i
+                      ? "border-ink bg-ink text-tile"
+                      : "border-chrome text-slate hover:border-ink hover:text-ink"
+                  }`}
+                >
+                  {s.n}
+                </button>
+              ))}
+            </div>
+
+            {/* Barra de avance del turno */}
+            {visible && !reduced && (
+              <span
+                key={`progress-${active}`}
+                className="step-progress absolute bottom-0 left-0 h-[3px] bg-stamp"
+                aria-hidden="true"
+              />
+            )}
+          </div>
+
+          {/* DERECHA: el paso y su escena */}
+          <div className="flex min-h-[380px] flex-col p-6 sm:p-8">
+            <div key={active} className={`${reduced ? "" : "step-swap"} flex flex-1 flex-col`}>
+              <h3 className="font-display text-[clamp(1.6rem,3.4vw,2.3rem)] leading-tight text-ink">
                 {step.title}
               </h3>
-              <p className="mt-3 text-slate leading-relaxed">{step.body}</p>
-            </li>
-          ))}
-        </ol>
+              <p className="mt-3 max-w-[46ch] leading-relaxed text-slate">
+                {step.body}
+              </p>
+              <div className="mt-auto pt-8">
+                {active === 0 && <PlanTicket />}
+                {active === 1 && <QRPrint active />}
+                {active === 2 && <CountUp active reduced={reduced} />}
+              </div>
+            </div>
+          </div>
+        </div>
       </Container>
     </section>
   );

@@ -172,7 +172,7 @@ export function Problem() {
       {/* Ticker de mostrador: corre; se frena al pasar el mouse. */}
       <div className="marquee mt-14 border-t border-chrome py-3" aria-hidden="true">
         <div className="marquee-track">
-          {[0, 1].map((dup) => (
+          {[0, 1, 2, 3].map((dup) => (
             <div key={dup} className="flex shrink-0 items-center">
               {TICKER.map((t) => (
                 <span

@@ -42,7 +42,10 @@ La **X es un sello**. Wordmark `GIX` con la X en rojo, rotada 3°, con textura d
 
 - **Contador del hero** (`components/three/Counter3D.tsx`): tablero split-flap que baja 30 → 29 → 28... Fichas que giran; solo gira la que cambia. Cámara auto-ajustable al ancho de la columna.
 - **Teléfono de la demo** (`components/three/PhoneApp.tsx`): teléfono 3D con la app de GIX. El marco y la pantalla son DOM real proyectado en 3D (drei `Html`, ver `components/GixAppUI.tsx`): nítido y con las fuentes de marca. El WebGL aporta grosor, botones y sombra. Sigue apenas el mouse.
+- **Compu de la caja** (`components/three/MacScreen.tsx`): iMac del mostrador. El frente (bisel + pantalla + mentón, ver `components/CajaUI.tsx`) es una pieza DOM proyectada; el WebGL pone el pie de aluminio y la sombra de apoyo.
 - Helpers compartidos en `components/three/flip.tsx`.
+
+Además: § 02 son fichas que se voltean (flip mecánico) con ticker de mostrador, § 05 es la app por dentro (sliders → desglose con comisión de cobro y gráfico de acumulado a 12 meses que se anima), y § 06 el ticket se imprime al entrar al viewport y recibe el sello de "30 días gratis".
 
 Todo el 3D carga solo en cliente (`next/dynamic`, `ssr: false`), en su propio chunk. Con `prefers-reduced-motion` o sin WebGL cae a un fallback estático 2D. Foco de teclado visible; sin scroll horizontal.
 
