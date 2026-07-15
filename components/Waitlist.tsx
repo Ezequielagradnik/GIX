@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { StampX } from "./Logo";
+import { StampCheck } from "./Logo";
 import { Container, SectionLabel } from "./ui";
 
 const RUBROS = [
@@ -62,8 +62,8 @@ export function Waitlist() {
 
           {status === "done" ? (
             <div className="flex items-center gap-5 border border-ink bg-tile p-8">
-              <span className="text-5xl leading-none">
-                <StampX size={52} />
+              <span className="leading-none">
+                <StampCheck size={54} />
               </span>
               <div>
                 <p className="font-display text-2xl text-ink">Anotado.</p>

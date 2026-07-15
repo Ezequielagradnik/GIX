@@ -73,6 +73,34 @@ export function StampX({
   );
 }
 
+/* Tic estampado: confirmacion de exito con el mismo lenguaje de
+   sello (rojo, rotado, tinta imperfecta). Se usa donde la X leeria
+   como error (pantalla de validacion, waitlist). */
+export function StampCheck({ size = 34 }: { size?: number }) {
+  return (
+    <svg
+      aria-hidden="true"
+      width={size}
+      height={size}
+      viewBox="0 0 100 100"
+      style={{
+        display: "inline-block",
+        transform: "rotate(-4deg)",
+        filter: "url(#gix-stamp-ink)",
+      }}
+    >
+      <path
+        d="M16 56 L40 78 L84 26"
+        fill="none"
+        stroke="var(--color-stamp)"
+        strokeWidth={19}
+        strokeLinecap="square"
+        strokeLinejoin="miter"
+      />
+    </svg>
+  );
+}
+
 /* Isotipo / app icon: solo la X estampada dentro de un cuadrado
    de esquinas apenas redondeadas. */
 export function Isotype({

@@ -1,4 +1,4 @@
-import { StampX } from "./Logo";
+import { StampCheck } from "./Logo";
 import { DemoPhone } from "./DemoPhone";
 import { Container, SectionLabel } from "./ui";
 
@@ -43,8 +43,8 @@ export function CounterDemo() {
               </p>
 
               <div className="my-6 flex items-center gap-4 border-y border-white/10 py-5">
-                <span className="text-5xl leading-none">
-                  <StampX size={52} />
+                <span className="leading-none">
+                  <StampCheck size={54} />
                 </span>
                 <div>
                   <p className="font-display text-xl leading-none">Validado</p>
