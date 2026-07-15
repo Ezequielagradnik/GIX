@@ -53,6 +53,7 @@ export function CajaPanel({
 }) {
   const [leads, setLeads] = useState(initial);
   const [toggleError, setToggleError] = useState<string | null>(null);
+  const [confirmId, setConfirmId] = useState<string | null>(null);
 
   const stats = useMemo(() => {
     const now = Date.now();
@@ -87,6 +88,36 @@ export function CajaPanel({
         ls.map((l) => (l.id === lead.id ? { ...l, contactado: !next } : l))
       );
       setToggleError(err instanceof Error ? err.message : "No se pudo actualizar.");
+    }
+  }
+
+  async function eliminar(lead: Lead) {
+    // Primer click: pide confirmacion. Segundo click (3.5s): borra.
+    if (confirmId !== lead.id) {
+      setConfirmId(lead.id);
+      window.setTimeout(
+        () => setConfirmId((c) => (c === lead.id ? null : c)),
+        3500
+      );
+      return;
+    }
+    setConfirmId(null);
+    setToggleError(null);
+    const prev = leads;
+    setLeads((ls) => ls.filter((l) => l.id !== lead.id));
+    try {
+      const res = await fetch("/api/caja/eliminar", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: lead.id }),
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error ?? "No se pudo eliminar.");
+      }
+    } catch (err) {
+      setLeads(prev); // revertir
+      setToggleError(err instanceof Error ? err.message : "No se pudo eliminar.");
     }
   }
 
@@ -139,7 +170,7 @@ export function CajaPanel({
           <table className="w-full min-w-[760px] border-collapse bg-tile text-left">
             <thead>
               <tr className="border-b border-chrome">
-                {["Nombre", "Comercio", "Rubro", "Fecha", "Contacto", ""].map(
+                {["Nombre", "Comercio", "Rubro", "Fecha", "Contacto", "", ""].map(
                   (h, i) => (
                     <th
                       key={i}
@@ -154,7 +185,7 @@ export function CajaPanel({
             <tbody>
               {leads.length === 0 && !loadError && (
                 <tr>
-                  <td colSpan={6} className="px-4 py-10 text-center font-mono text-sm text-slate">
+                  <td colSpan={7} className="px-4 py-10 text-center font-mono text-sm text-slate">
                     Todavía no hay anotados. Cuando entren, aparecen acá.
                   </td>
                 </tr>
@@ -206,6 +237,20 @@ export function CajaPanel({
                       ) : (
                         "Marcar contactado"
                       )}
+                    </button>
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-3 text-right">
+                    <button
+                      type="button"
+                      onClick={() => eliminar(lead)}
+                      aria-label={`Eliminar a ${lead.nombre}`}
+                      className={`border px-2.5 py-1.5 font-mono text-[11px] uppercase tracking-[0.1em] transition-colors ${
+                        confirmId === lead.id
+                          ? "border-stamp bg-stamp text-tile"
+                          : "border-transparent text-slate hover:border-stamp hover:text-stamp"
+                      }`}
+                    >
+                      {confirmId === lead.id ? "¿Seguro?" : "✕"}
                     </button>
                   </td>
                 </tr>
