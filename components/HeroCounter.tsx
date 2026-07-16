@@ -12,15 +12,15 @@ const Counter3D = dynamic(() => import("./three/Counter3D"), {
   loading: () => <Fallback />,
 });
 
-function Fallback() {
+function Fallback({ unit = "CONSUMOS" }: { unit?: string }) {
   return (
     <div className="flex h-full w-full items-center text-[clamp(3rem,11vw,7rem)]">
-      <CounterStatic value={30} unit="CAFÉS" />
+      <CounterStatic value={30} unit={unit} />
     </div>
   );
 }
 
-export function HeroCounter({ unit = "CAFÉS" }: { unit?: string }) {
+export function HeroCounter({ unit = "CONSUMOS" }: { unit?: string }) {
   const [reduced, setReduced] = useState(false);
   const [ready, setReady] = useState(false);
 
@@ -36,7 +36,7 @@ export function HeroCounter({ unit = "CAFÉS" }: { unit?: string }) {
   // Alto fijo para el canvas; el contenido 3D escala solo (FitCamera).
   return (
     <div className="h-[230px] w-full sm:h-[300px]">
-      {!ready || reduced ? <Fallback /> : <Counter3D unit={unit} />}
+      {!ready || reduced ? <Fallback unit={unit} /> : <Counter3D unit={unit} />}
     </div>
   );
 }

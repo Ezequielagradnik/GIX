@@ -33,10 +33,13 @@ const START = 30;
 const STEP_MS = 2400;
 
 function UnitTile({ unit, x }: { unit: string; x: number }) {
-  const tex = useMemo(
-    () => glyphTexture(unit, { bg: INK, fg: CHROME, ratio: TH / 1.5, px: 62, spacing: 8 }),
-    [unit]
-  );
+  const tex = useMemo(() => {
+    // Fuente adaptativa: textos largos (CONSUMOS) achican para no
+    // salirse del canvas de 256px del tile.
+    const px = Math.min(62, Math.floor(236 / (unit.length * 0.72)));
+    const spacing = px > 50 ? 8 : 4;
+    return glyphTexture(unit, { bg: INK, fg: CHROME, ratio: TH / 1.5, px, spacing });
+  }, [unit]);
   return (
     <mesh position={[x, 0, 0]} castShadow>
       <boxGeometry args={[1.5, TH, DEPTH]} />
@@ -65,7 +68,7 @@ function Board({ value, unit }: { value: number; unit: string }) {
   );
 }
 
-export default function Counter3D({ unit = "CAFÉS" }: { unit?: string }) {
+export default function Counter3D({ unit = "CONSUMOS" }: { unit?: string }) {
   const [value, setValue] = useState(START);
   useEffect(() => {
     const id = window.setInterval(() => {
@@ -79,7 +82,7 @@ export default function Counter3D({ unit = "CAFÉS" }: { unit?: string }) {
       className="h-full w-full"
       role="status"
       aria-live="off"
-      aria-label={`Saldo: ${value} ${unit.toLowerCase()}`}
+      aria-label={`Disponibles: ${value} ${unit.toLowerCase()}`}
     >
       <Canvas
         shadows

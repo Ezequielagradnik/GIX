@@ -37,13 +37,17 @@ export function Hero() {
             <div className="border border-ink bg-tile px-4 pt-4 sm:px-5 sm:pt-5">
               <div className="flex items-center justify-between gap-6">
                 <span className="readout font-mono">Plan Café Mensual</span>
-                <span className="readout font-mono text-ink">Saldo</span>
+                <span className="readout font-mono text-ink">Disponibles</span>
               </div>
-              <HeroCounter unit="CAFÉS" />
-              <div className="flex flex-wrap items-center gap-x-5 gap-y-1 border-t border-chrome py-3">
-                <span className="font-mono text-sm text-slate">$30.000/mes</span>
-                <span className="font-mono text-sm text-slate">30 cafés</span>
-                <span className="font-mono text-sm text-slate">máx. 2 por día</span>
+              <HeroCounter unit="CONSUMOS" />
+              {/* Letra chica del ticket: una linea, troquel arriba. */}
+              <div
+                className="border-t py-3 text-center"
+                style={{ borderTopStyle: "dashed", borderTopColor: "color-mix(in srgb, var(--color-ink) 35%, transparent)" }}
+              >
+                <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-slate">
+                  $30.000/mes · 30 consumos · máx. 2 por día
+                </p>
               </div>
             </div>
           </div>
