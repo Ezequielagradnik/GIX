@@ -34,9 +34,10 @@ const STEP_MS = 2400;
 
 function UnitTile({ unit, x }: { unit: string; x: number }) {
   const tex = useMemo(() => {
-    // Fuente adaptativa: textos largos (CONSUMOS) achican para no
-    // salirse del canvas de 256px del tile.
-    const px = Math.min(62, Math.floor(236 / (unit.length * 0.72)));
+    // Fuente adaptativa: se calcula con la palabra mas larga (las
+    // unidades con espacio se apilan en renglones).
+    const maxLen = Math.max(...unit.split(" ").map((w) => w.length));
+    const px = Math.min(62, Math.floor(236 / (maxLen * 0.72)));
     const spacing = px > 50 ? 8 : 4;
     return glyphTexture(unit, { bg: INK, fg: CHROME, ratio: TH / 1.5, px, spacing });
   }, [unit]);

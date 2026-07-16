@@ -39,7 +39,7 @@ export function Hero() {
                 <span className="readout font-mono">Plan Café Mensual</span>
                 <span className="readout font-mono text-ink">Disponibles</span>
               </div>
-              <HeroCounter unit="CONSUMOS" />
+              <HeroCounter unit="CONSUMOS DISPONIBLES" />
               {/* Letra chica del ticket: una linea, troquel arriba. */}
               <div
                 className="border-t py-3 text-center"

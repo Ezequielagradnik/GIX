@@ -40,8 +40,13 @@ export function glyphTexture(
     (typeof document !== "undefined" &&
       getComputedStyle(document.body).getPropertyValue("--font-plex-mono").trim()) ||
     "ui-monospace";
-  x.font = `700 ${px ?? Math.round(h * 0.66)}px ${fam}, ui-monospace, monospace`;
-  x.fillText(txt, w / 2, h / 2 + h * 0.03);
+  const fs = px ?? Math.round(h * 0.66);
+  x.font = `700 ${fs}px ${fam}, ui-monospace, monospace`;
+  // Multilinea: cada palabra en su renglon (para unidades largas).
+  const lines = txt.includes(" ") ? txt.split(" ") : [txt];
+  const lh = fs * 1.3;
+  const y0 = h / 2 + h * 0.03 - ((lines.length - 1) * lh) / 2;
+  lines.forEach((ln, i) => x.fillText(ln, w / 2, y0 + i * lh));
   const t = new THREE.CanvasTexture(c);
   t.colorSpace = THREE.SRGBColorSpace;
   t.anisotropy = 8;

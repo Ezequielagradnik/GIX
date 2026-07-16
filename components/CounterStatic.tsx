@@ -19,15 +19,19 @@ export function CounterStatic({ value = 30, unit = "CAFÉS" }: { value?: number;
         </div>
       ))}
       <div
-        className="flex h-[1.34em] items-center justify-center rounded-[0.08em] bg-ink px-[0.34em]"
+        className="flex h-[1.34em] flex-col items-center justify-center rounded-[0.08em] bg-ink px-[0.34em]"
         aria-hidden="true"
       >
-        <span
-          className="font-mono font-medium text-chrome"
-          style={{ fontSize: "0.3em", letterSpacing: "0.26em", paddingLeft: "0.26em" }}
-        >
-          {unit}
-        </span>
+        {/* Unidades con espacio: una palabra por renglon. */}
+        {unit.split(" ").map((w) => (
+          <span
+            key={w}
+            className="font-mono font-medium leading-[1.5] text-chrome"
+            style={{ fontSize: "0.22em", letterSpacing: "0.2em", paddingLeft: "0.2em" }}
+          >
+            {w}
+          </span>
+        ))}
       </div>
     </div>
   );
