@@ -12,12 +12,11 @@ export function Hero() {
             <p className="readout font-mono mb-6">GIX · El mostrador</p>
 
             <h1 className="font-display text-ink text-[clamp(2.6rem,6.4vw,4.8rem)] leading-[0.92]">
-              Cobrá el mes que viene, hoy.
+              Tus clientes vuelven, desde el día uno.
             </h1>
 
             <p className="mt-6 max-w-[42ch] text-lg text-slate leading-relaxed">
-              Tus clientes pagan la membresía por adelantado. Vos sabés cuánto
-              entra el 1 de cada mes.
+              Fidelizá. Cobrá por adelantado. Hacé que vuelvan todos los meses.
             </p>
 
             <div className="mt-10 flex flex-wrap items-center gap-5">

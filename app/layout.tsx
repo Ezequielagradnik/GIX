@@ -24,11 +24,11 @@ const plexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "GIX — Cobrá el mes que viene, hoy",
+  title: "GIX — Tus clientes vuelven, desde el día uno",
   description:
-    "Membresías por consumo para tu comercio. Tus clientes pagan por adelantado, vos sabés cuánto entra el 1 de cada mes. 30 días de prueba, sin tarjeta.",
+    "Membresías por consumo para tu comercio. Fidelizá, cobrá por adelantado y hacé que vuelvan todos los meses. 30 días de prueba, sin tarjeta.",
   openGraph: {
-    title: "GIX — Cobrá el mes que viene, hoy",
+    title: "GIX — Tus clientes vuelven, desde el día uno",
     description:
       "Membresías por consumo para tu comercio. Ingreso recurrente, cobrado por adelantado.",
     type: "website",
