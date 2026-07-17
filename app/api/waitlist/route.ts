@@ -21,6 +21,7 @@ type Payload = {
   nombre?: unknown;
   comercio?: unknown;
   rubro?: unknown;
+  rubroOtro?: unknown;
   whatsapp?: unknown;
 };
 
@@ -39,6 +40,7 @@ export async function POST(req: Request) {
   const nombre = clean(body.nombre);
   const comercio = clean(body.comercio);
   const rubro = clean(body.rubro);
+  const rubroOtro = clean(body.rubroOtro);
   const whatsapp = clean(body.whatsapp);
 
   if (!nombre || !comercio || !rubro || !whatsapp) {
@@ -50,6 +52,11 @@ export async function POST(req: Request) {
   if (!RUBROS.includes(rubro)) {
     return NextResponse.json({ error: "Rubro no válido." }, { status: 400 });
   }
+  if (rubro === "Otro" && !rubroOtro) {
+    return NextResponse.json({ error: "Contanos qué rubro." }, { status: 400 });
+  }
+  // Solo guardamos el detalle cuando el rubro es "Otro".
+  const rubro_otro = rubro === "Otro" ? rubroOtro : null;
   const digits = whatsapp.replace(/\D/g, "");
   if (digits.length < 8) {
     return NextResponse.json(
@@ -67,6 +74,7 @@ export async function POST(req: Request) {
       nombre,
       comercio,
       rubro,
+      rubro_otro,
       whatsapp,
     });
     return NextResponse.json({ ok: true, stored: false });
@@ -78,7 +86,7 @@ export async function POST(req: Request) {
     });
     const { error } = await supabase
       .from("waitlist")
-      .insert({ nombre, comercio, rubro, whatsapp });
+      .insert({ nombre, comercio, rubro, rubro_otro, whatsapp });
 
     if (error) {
       console.error("[waitlist] supabase error:", error.message);

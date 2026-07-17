@@ -12,6 +12,7 @@ export type Lead = {
   nombre: string;
   comercio: string;
   rubro: string;
+  rubro_otro?: string | null;
   whatsapp: string;
   contactado?: boolean | null;
 };
@@ -202,9 +203,14 @@ export function CajaPanel({
                   </td>
                   <td className="px-4 py-3 text-slate">{lead.comercio}</td>
                   <td className="px-4 py-3">
-                    <span className="whitespace-nowrap border border-chrome px-2 py-1 font-mono text-[11px] uppercase tracking-[0.08em] text-slate">
-                      {lead.rubro}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="whitespace-nowrap border border-chrome px-2 py-1 font-mono text-[11px] uppercase tracking-[0.08em] text-slate">
+                        {lead.rubro}
+                      </span>
+                      {lead.rubro === "Otro" && lead.rubro_otro && (
+                        <span className="text-slate">{lead.rubro_otro}</span>
+                      )}
+                    </div>
                   </td>
                   <td className="whitespace-nowrap px-4 py-3 font-mono text-sm tabular-nums text-slate">
                     {fmtFecha(lead.created_at)}
