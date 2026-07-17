@@ -10,9 +10,13 @@ import { Logo, StampCheck } from "./Logo";
 export function CajaUI({
   codigo = "583921",
   saldo = 27,
+  nombre = "Martín Gómez",
+  pack = "Café + medialuna",
 }: {
   codigo?: string;
   saldo?: number;
+  nombre?: string;
+  pack?: string;
 }) {
   return (
     <div
@@ -29,11 +33,14 @@ export function CajaUI({
 
       {/* Cuerpo */}
       <div className="flex flex-1 items-stretch gap-6 pt-5">
-        {/* Izquierda: codigo + validado */}
+        {/* Izquierda: cliente + token + validado */}
         <div className="flex flex-1 flex-col justify-between">
           <div>
-            <p className="font-mono text-[12px] text-chrome">Código del cliente</p>
-            <p className="mt-1 font-mono text-[34px] font-semibold leading-none tracking-[0.12em] tabular-nums">
+            <p className="font-mono text-[12px] text-chrome">Cliente</p>
+            <p className="mt-1 font-display text-[20px] leading-tight">{nombre}</p>
+            <p className="mt-0.5 font-mono text-[12px] text-slate">{pack}</p>
+            <p className="mt-4 font-mono text-[12px] text-chrome">Token</p>
+            <p className="mt-1 font-mono text-[30px] font-semibold leading-none tracking-[0.12em] tabular-nums">
               {codigo}
             </p>
           </div>
