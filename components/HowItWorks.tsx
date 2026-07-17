@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Container, SectionLabel } from "./ui";
+import { Logo } from "./Logo";
 
 /* ============================================================
    § 03 CÓMO FUNCIONA — el turnero grande.
@@ -44,23 +45,75 @@ function usePrefersReducedMotion() {
   return reduced;
 }
 
-/* ---- Escena 01: el ticket del plan ---- */
+/* ---- Escena 01: el ticket del plan ----
+   Comprobante térmico: marca, precio héroe, sello de goma, chip de
+   horario y código de barras. Más comanda de verdad, menos lista. */
+const BARCODE = [
+  3, 1, 1, 2, 1, 1, 3, 2, 1, 3, 1, 1, 2, 1, 2, 1, 1, 3, 1, 2,
+  2, 1, 1, 2, 3, 1, 1, 1, 2, 1, 3, 2, 1, 1, 2, 1, 2, 3, 1, 2,
+];
+
+function Barcode() {
+  return (
+    <div className="flex justify-center px-5" aria-hidden="true">
+      <div className="flex h-9 items-stretch">
+        {BARCODE.map((w, i) => (
+          <span
+            key={i}
+            className={i % 2 === 0 ? "bg-ink" : "bg-transparent"}
+            style={{ width: `${w}px` }}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function PlanTicket() {
   return (
     <div
-      className="ticket w-[250px]"
+      className="ticket relative w-[268px]"
       style={{ ["--z" as string]: "9px", paddingBlock: "calc(9px + 1rem)" }}
     >
-      <p className="px-5 text-center font-display text-lg text-ink">GIX</p>
-      <p className="mt-0.5 px-5 pb-2 text-center font-mono text-[9px] uppercase tracking-[0.2em] text-slate">
-        Nuevo plan
+      {/* Encabezado: marca + folio */}
+      <div className="flex items-center justify-between px-5">
+        <Logo size={18} />
+        <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-slate">
+          N.º 0001
+        </span>
+      </div>
+      <p className="mt-1.5 px-5 pb-3 font-mono text-[9px] uppercase tracking-[0.22em] text-slate">
+        Nuevo plan · Comprobante
       </p>
       <hr className="ticket-rule" />
+
+      {/* Nombre del plan + sello + precio héroe */}
+      <div className="px-5 py-3">
+        <div className="flex items-start justify-between gap-3">
+          <p className="font-display text-[1.4rem] leading-none text-ink">
+            Café Mensual
+          </p>
+          <span
+            className="mt-0.5 shrink-0 rotate-[-6deg] rounded-[5px] border-2 border-stamp px-2 py-0.5 font-mono text-[9px] font-semibold uppercase tracking-[0.16em] text-stamp"
+            style={{ filter: "url(#gix-stamp-ink)" }}
+          >
+            Activo
+          </span>
+        </div>
+        <div className="mt-2.5 flex items-baseline gap-1.5">
+          <span className="font-mono text-[1.9rem] font-semibold leading-none tabular-nums text-ink">
+            $30.000
+          </span>
+          <span className="font-mono text-[11px] text-slate">/mes</span>
+        </div>
+      </div>
+      <hr className="ticket-rule" />
+
+      {/* Detalle */}
       {[
-        ["Plan", "Café Mensual"],
-        ["Precio", "$30.000/mes"],
         ["Consumos", "30 cafés"],
-        ["Tope", "máx. 2 por día"],
+        ["Tope diario", "máx. 2"],
+        ["Cobro", "1 de cada mes"],
       ].map(([k, v]) => (
         <div
           key={k}
@@ -71,15 +124,26 @@ function PlanTicket() {
         </div>
       ))}
       <hr className="ticket-rule" />
-      <div className="px-5 pb-1 pt-2.5">
+
+      {/* ¿Qué incluye? + chip de horario */}
+      <div className="px-5 pb-3 pt-2.5">
         <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-slate">
           ¿Qué incluye?
         </p>
-        <p className="mt-1.5 font-mono text-[11px] font-semibold text-ink">
+        <p className="mt-1.5 font-mono text-[12px] font-semibold text-ink">
           Café + medialuna
         </p>
-        <p className="mt-0.5 font-mono text-[11px] text-slate">
-          De lunes a jueves, de 10 a 17 h
+        <span className="mt-2.5 inline-block rounded-full border border-ink/25 px-2.5 py-1 font-mono text-[10px] text-slate">
+          Lun a Jue · 10–17 h
+        </span>
+      </div>
+      <hr className="ticket-rule" />
+
+      {/* Código de barras */}
+      <div className="pt-3.5">
+        <Barcode />
+        <p className="mt-2 text-center font-mono text-[9px] uppercase tracking-[0.3em] text-slate">
+          GIX·CAFE·30
         </p>
       </div>
     </div>
