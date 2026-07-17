@@ -36,7 +36,7 @@ export function Hero() {
           <div className="w-full">
             <div className="border border-ink bg-tile px-4 pt-4 sm:px-5 sm:pt-5">
               <div className="flex items-center justify-between gap-6">
-                <span className="readout font-mono">Plan Café Mensual</span>
+                <span className="readout font-mono">Plan Mensual</span>
                 <span className="readout font-mono text-ink">Disponibles</span>
               </div>
               <HeroCounter unit="CONSUMOS DISPONIBLES" />
