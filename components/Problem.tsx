@@ -180,7 +180,7 @@ export function Problem() {
                   className="flex items-center font-mono text-xs uppercase tracking-[0.22em] text-slate"
                 >
                   <span className="px-5">{t}</span>
-                  <span className="inline-block rotate-[4deg] text-stamp">✕</span>
+                  <span className="inline-block text-stamp">✓</span>
                 </span>
               ))}
             </div>
