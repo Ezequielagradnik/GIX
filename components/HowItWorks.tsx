@@ -87,33 +87,64 @@ function PlanTicket() {
 }
 
 /* ---- Escena 02: el QR que se imprime ---- */
-const QR_ROWS = [
-  "11111010111",
-  "10001001001",
-  "10111010101",
-  "10101110111",
-  "11111000100",
-  "00010110010",
-  "10110101110",
-  "00101011000",
-  "11111011010",
-  "10001010110",
-  "11101110101",
+const QR_SIZE = 25;
+
+/* Matriz tipo QR determinista: tres ojos (finder patterns) en las
+   esquinas y datos pseudo-aleatorios estables (mismo render en SSR
+   y cliente). Los ojos se dibujan aparte, redondeados, para que
+   quede como un QR real y no como un grid de cuadraditos. */
+function buildQRData() {
+  const N = QR_SIZE;
+  const inEye = (r: number, c: number) =>
+    (r < 8 && c < 8) || (r < 8 && c >= N - 8) || (r >= N - 8 && c < 8);
+
+  let seed = 20260717;
+  const rnd = () =>
+    (seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff;
+
+  const cells: Array<[number, number]> = [];
+  for (let r = 0; r < N; r++) {
+    for (let c = 0; c < N; c++) {
+      if (inEye(r, c)) continue;
+      if (rnd() > 0.52) cells.push([r, c]);
+    }
+  }
+  return cells;
+}
+
+const QR_CELLS = buildQRData();
+const QR_EYES = [
+  [0, 0],
+  [0, QR_SIZE - 7],
+  [QR_SIZE - 7, 0],
 ];
 
 function QRPrint({ active }: { active: boolean }) {
+  const N = QR_SIZE;
   return (
     <div className="flex items-center gap-5">
-      <div className="grid w-fit grid-cols-11 gap-[2px] border border-chrome bg-[#f3f5f3] p-2.5">
-        {QR_ROWS.join("").split("").map((c, i) => (
-          <span
-            key={i}
-            className={`h-[8px] w-[8px] transition-opacity duration-150 ${
-              c === "1" ? "bg-ink" : "bg-transparent"
-            } ${active ? "opacity-100" : "opacity-0"}`}
-            style={{ transitionDelay: active ? `${(i % 11) * 22 + Math.floor(i / 11) * 30}ms` : "0ms" }}
-          />
-        ))}
+      <div className="w-fit rounded-[8px] border border-chrome bg-white p-3 shadow-[0_6px_18px_-10px_rgba(22,25,26,0.5)]">
+        <svg
+          viewBox={`0 0 ${N} ${N}`}
+          className={`h-[128px] w-[128px] transition-opacity duration-300 ${
+            active ? "opacity-100" : "opacity-0"
+          }`}
+          role="img"
+          aria-label="Código QR del plan"
+        >
+          {/* Datos: modulos redondeados */}
+          {QR_CELLS.map(([r, c]) => (
+            <circle key={`${r}-${c}`} cx={c + 0.5} cy={r + 0.5} r={0.46} fill="#16191a" />
+          ))}
+          {/* Ojos: anillo redondeado + centro */}
+          {QR_EYES.map(([r0, c0]) => (
+            <g key={`${r0}-${c0}`}>
+              <rect x={c0} y={r0} width={7} height={7} rx={1.8} fill="#16191a" />
+              <rect x={c0 + 1} y={r0 + 1} width={5} height={5} rx={1.2} fill="#ffffff" />
+              <rect x={c0 + 2} y={r0 + 2} width={3} height={3} rx={0.8} fill="#16191a" />
+            </g>
+          ))}
+        </svg>
       </div>
       <p className="max-w-[16ch] font-mono text-[11px] uppercase tracking-[0.15em] text-slate">
         Pegalo en el mostrador y listo
