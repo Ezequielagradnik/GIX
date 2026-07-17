@@ -36,8 +36,9 @@ function Mac({
     t.current += Math.min(dt, 0.05);
     if (!g.current) return;
     const m = mouse.current;
-    // Apoyada: nada de flotar. Solo un giro sutil que sigue el mouse.
-    const targetY = 0.08 + Math.sin(t.current * 0.4) * 0.025 + m.x * 0.11;
+    // Apoyada: nada de flotar. En reposo mira de frente (yaw ~0) para
+    // que el pie quede centrado bajo la pantalla; solo sigue el mouse.
+    const targetY = Math.sin(t.current * 0.4) * 0.02 + m.x * 0.11;
     const targetX = -0.01 + m.y * 0.05;
     const k = 1 - Math.pow(0.001, dt);
     g.current.rotation.y += (targetY - g.current.rotation.y) * k;
@@ -111,7 +112,7 @@ export default function MacScreen({
         shadows
         dpr={[1, 2]}
         gl={{ antialias: true, alpha: true, preserveDrawingBuffer: true }}
-        camera={{ position: [0.3, 0.15, 6.6], fov: 26 }}
+        camera={{ position: [0, 0.12, 6.6], fov: 26 }}
         onCreated={({ camera }) => camera.lookAt(0, 0, 0)}
       >
         <ambientLight intensity={0.85} />
