@@ -10,11 +10,11 @@ export function CounterDemo() {
 
         <div className="mt-4 max-w-[52ch]">
           <h2 className="font-display text-ink text-[clamp(1.8rem,4vw,2.8rem)] leading-tight">
-            Mostrá tu token y empezá a consumir. Validar el consumo lleva menos
-            de 3 segundos.
+            Mostrá tu token y empezá a consumir.
           </h2>
           <p className="mt-3 text-slate leading-relaxed">
-            Sin hardware. Sin app que instalar. Un código de 6 dígitos y listo.
+            Validar el consumo lleva menos de 3 segundos. Sin hardware. Sin app
+            que instalar. Un código de 6 dígitos y listo.
           </p>
         </div>
 
