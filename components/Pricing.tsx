@@ -69,12 +69,11 @@ export function Pricing() {
               Un plan. $39.900 por mes.
             </h2>
             <p className="mt-4 text-slate leading-relaxed">
-              Sin tabla de tres columnas. Sin &ldquo;contactar ventas&rdquo;. El
-              competidor cobra $49.900 y no te resuelve el costo de
-              procesamiento.
+              Creá tus planes, cobrá automáticamente, gestioná consumos y
+              fidelizá clientes desde un solo lugar.
             </p>
             <p className="mt-4 font-mono text-ink">
-              Lo mismo, pero te queda más plata.
+              Un solo plan. Todo incluido.
             </p>
           </div>
 
@@ -107,13 +106,6 @@ export function Pricing() {
                     label="Después"
                     value="$39.900 /mes"
                     sub="Un plan. Sin escalones."
-                  />
-                  <hr className="ticket-rule" />
-                  <Row
-                    label="Otras plataformas"
-                    value="$49.900"
-                    strike
-                    sub="Y te cobran el procesamiento aparte."
                   />
                   <hr className="ticket-rule" />
                   <div className="px-7 py-4">
