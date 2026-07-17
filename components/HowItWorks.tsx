@@ -155,7 +155,7 @@ function QRPrint({ active }: { active: boolean }) {
 
 /* ---- Escena 03: la plata contando ---- */
 function CountUp({ active, reduced }: { active: boolean; reduced: boolean }) {
-  const TARGET = 1_500_000;
+  const TARGET = 10_500_000;
   const [v, setV] = useState(TARGET);
 
   useEffect(() => {
