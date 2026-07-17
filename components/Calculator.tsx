@@ -1,19 +1,22 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Container, SectionLabel } from "./ui";
 
 /* ============================================================
    § 05 LA CUENTA — la app por dentro.
-   Una ventana del panel de GIX: sliders de suscriptores y precio,
-   el desglose (bruto, GIX, comisión de cobro) y el gráfico de
-   acumulado a 12 meses que se mueve con los sliders.
-   Gráfico: una sola serie, barras ink sobre tile, techo "redondo"
-   que se adapta. El rojo queda para el número héroe.
+   Una ventana del panel de GIX. Ya no hay sliders: el panel corre
+   solo, como un mini video en loop. Un plan real va sumando
+   suscriptores mes a mes durante el año; el número de suscriptores
+   sube, cambia el mes y el gráfico de líneas (evolución de los
+   últimos 12 meses) se va dibujando. El desglose (bruto, GIX,
+   comisión y neto por mes) tickea con cada mes. Reduced-motion:
+   todo quieto en diciembre.
    ============================================================ */
 
 const GIX_FEE = 39900;
 const PROC_RATE = 0.06; // estimado; depende del medio de cobro
+const PRICE = 30000; // precio del plan (fijo)
 
 const ars = new Intl.NumberFormat("es-AR", {
   style: "currency",
@@ -23,6 +26,25 @@ const ars = new Intl.NumberFormat("es-AR", {
 const plain = new Intl.NumberFormat("es-AR");
 
 const MESES = ["E", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"];
+const MES_LARGO = [
+  "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+  "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre",
+];
+
+/* Un plan que crece: suscriptores mes a mes a lo largo del año. */
+const SUB_SERIES = [45, 62, 80, 100, 122, 145, 168, 190, 210, 228, 244, 260];
+
+/* Neto de cada mes y acumulado (constantes: derivan de la serie). */
+const MONTHLY_NET = SUB_SERIES.map((s) => {
+  const bruto = s * PRICE;
+  const proc = Math.round(bruto * PROC_RATE);
+  return Math.max(0, bruto - GIX_FEE - proc);
+});
+const ACCUM = MONTHLY_NET.reduce<number[]>((arr, n, i) => {
+  arr.push((arr[i - 1] ?? 0) + n);
+  return arr;
+}, []);
+const TOTAL_ANUAL = ACCUM[ACCUM.length - 1];
 
 /* Techo "redondo" para la escala: 1 / 2 / 2.5 / 5 × 10^n. */
 function niceCeil(v: number) {
@@ -43,61 +65,98 @@ function compact(v: number) {
   return `$${Math.round(v / 1000)} mil`;
 }
 
-function SliderRow({
-  id,
-  label,
-  value,
-  valueLabel,
-  min,
-  max,
-  step,
-  onChange,
-  ariaText,
-}: {
-  id: string;
-  label: string;
-  value: number;
-  valueLabel: string;
-  min: number;
-  max: number;
-  step: number;
-  onChange: (v: number) => void;
-  ariaText: string;
-}) {
-  return (
-    <div>
-      <div className="flex items-baseline justify-between">
-        <label htmlFor={id} className="font-body text-ink">
-          {label}
-        </label>
-        <span className="font-mono text-xl font-semibold tabular-nums text-ink">
-          {valueLabel}
-        </span>
-      </div>
-      <input
-        id={id}
-        type="range"
-        min={min}
-        max={max}
-        step={step}
-        value={value}
-        onChange={(e) => onChange(Number(e.target.value))}
-        className="reg-slider mt-3"
-        aria-valuetext={ariaText}
-      />
-    </div>
-  );
+const CEIL = niceCeil(TOTAL_ANUAL);
+const CW = 100; // ancho del viewBox del gráfico
+const CH = 56; // alto del viewBox del gráfico
+const xAt = (i: number) => (i / 11) * CW;
+const yAt = (v: number) => CH - (v / CEIL) * CH;
+
+/* Duración de un ciclo del loop (12 meses + una pausa en diciembre). */
+const CYCLE_MS = 10500;
+
+function usePrefersReducedMotion() {
+  const [reduced, setReduced] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setReduced(mq.matches);
+    const on = () => setReduced(mq.matches);
+    mq.addEventListener("change", on);
+    return () => mq.removeEventListener("change", on);
+  }, []);
+  return reduced;
 }
 
 export function Calculator() {
-  const [subs, setSubs] = useState(50);
-  const [price, setPrice] = useState(30000);
+  const reduced = usePrefersReducedMotion();
+  const ref = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+  // Playhead continuo en [0, 12): 0..11 recorre el año, 11..12 pausa.
+  const [p, setP] = useState(0);
 
-  const bruto = subs * price;
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisible(true);
+          io.disconnect();
+        }
+      },
+      { threshold: 0.25 }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!visible || reduced) {
+      setP(11);
+      return;
+    }
+    let raf = 0;
+    let last: number | null = null;
+    const speed = 12 / CYCLE_MS; // unidades por ms
+    const tick = (t: number) => {
+      if (last === null) last = t;
+      const dt = t - last;
+      last = t;
+      setP((prev) => {
+        let np = prev + dt * speed;
+        if (np >= 12) np -= 12;
+        return np;
+      });
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [visible, reduced]);
+
+  // Playhead visible (clampeado a 11: durante la pausa queda lleno).
+  const pv = Math.min(p, 11);
+  const mi = Math.floor(pv);
+  const frac = pv - mi;
+  const nextI = Math.min(mi + 1, 11);
+
+  const subsShown = Math.round(
+    SUB_SERIES[mi] + (SUB_SERIES[nextI] - SUB_SERIES[mi]) * frac
+  );
+
+  // Desglose del mes actual (tickea con el loop).
+  const bruto = subsShown * PRICE;
   const proc = Math.round(bruto * PROC_RATE);
   const neto = Math.max(0, bruto - GIX_FEE - proc);
-  const anual = neto * 12;
-  const ceil = niceCeil(anual);
+
+  // Gráfico: línea que se dibuja hasta el playhead.
+  const vEnd = ACCUM[mi] + (ACCUM[nextI] - ACCUM[mi]) * frac;
+  const xEnd = xAt(pv);
+  const yEnd = yAt(vEnd);
+
+  const trackPts = ACCUM.map((v, i) => `${xAt(i)},${yAt(v)}`).join(" ");
+  const drawn = ACCUM.slice(0, mi + 1).map((v, i) => `${xAt(i)},${yAt(v)}`);
+  drawn.push(`${xEnd},${yEnd}`);
+  const drawnLine = `M ${drawn.join(" L ")}`;
+  const drawnArea = `${drawnLine} L ${xEnd},${CH} L 0,${CH} Z`;
 
   return (
     <section className="border-b border-chrome py-16 sm:py-24">
@@ -109,12 +168,15 @@ export function Calculator() {
             Así se ve tu plan por dentro.
           </h2>
           <p className="mt-3 text-slate leading-relaxed">
-            Movés los sliders, ves tu plata. Sin sorpresas.
+            El plan corre solo. Vos ves tu plata crecer, mes a mes.
           </p>
         </div>
 
         {/* Ventana del panel */}
-        <div className="mt-10 overflow-hidden rounded-[10px] border border-ink bg-tile shadow-[0_40px_70px_-45px_rgba(22,25,26,0.6)]">
+        <div
+          ref={ref}
+          className="mt-10 overflow-hidden rounded-[10px] border border-ink bg-tile shadow-[0_40px_70px_-45px_rgba(22,25,26,0.6)]"
+        >
           {/* Barra de ventana */}
           <div className="flex items-center gap-4 border-b border-chrome px-4 py-2.5">
             <span className="flex gap-1.5" aria-hidden="true">
@@ -129,34 +191,40 @@ export function Calculator() {
           </div>
 
           <div className="grid gap-10 p-6 sm:p-8 lg:grid-cols-[0.95fr_1.05fr] lg:gap-12">
-            {/* IZQUIERDA: controles + desglose */}
+            {/* IZQUIERDA: card del plan + desglose */}
             <div>
-              <p className="readout font-mono">Configuración del plan</p>
-              <div className="mt-6 grid gap-7">
-                <SliderRow
-                  id="subs"
-                  label="Suscriptores"
-                  value={subs}
-                  valueLabel={plain.format(subs)}
-                  min={10}
-                  max={500}
-                  step={5}
-                  onChange={setSubs}
-                  ariaText={`${subs} suscriptores`}
-                />
-                <SliderRow
-                  id="price"
-                  label="Precio del plan"
-                  value={price}
-                  valueLabel={ars.format(price)}
-                  min={10000}
-                  max={60000}
-                  step={1000}
-                  onChange={setPrice}
-                  ariaText={`${ars.format(price)} por mes`}
-                />
+              <p className="readout font-mono">Plan en marcha</p>
+
+              {/* Card: nombre, suscriptores (sube) y precio. */}
+              <div className="mt-5 rounded-[8px] border border-chrome bg-white/40 p-5">
+                <div className="flex items-baseline justify-between gap-4">
+                  <div>
+                    <p className="readout font-mono">Plan</p>
+                    <p className="mt-1 font-display text-[1.35rem] leading-none text-ink">
+                      Café Mensual
+                    </p>
+                  </div>
+                  <span className="border border-chrome px-2.5 py-1 font-mono text-[11px] uppercase tracking-[0.14em] text-slate">
+                    {MES_LARGO[mi]}
+                  </span>
+                </div>
+                <div className="mt-6 grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="readout font-mono">Suscriptores</p>
+                    <p className="mt-1 font-mono text-[clamp(1.8rem,4vw,2.4rem)] font-semibold leading-none tabular-nums text-ink">
+                      {plain.format(subsShown)}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="readout font-mono">Precio del plan</p>
+                    <p className="mt-1 font-mono text-[clamp(1.8rem,4vw,2.4rem)] font-semibold leading-none tabular-nums text-ink">
+                      {ars.format(PRICE)}
+                    </p>
+                  </div>
+                </div>
               </div>
 
+              {/* Desglose (esta parte queda igual). */}
               <div className="mt-8 border-t border-chrome pt-5">
                 <dl className="grid gap-2 font-mono text-sm">
                   <div className="flex items-baseline justify-between">
@@ -184,71 +252,74 @@ export function Calculator() {
               </div>
             </div>
 
-            {/* DERECHA: acumulado 12 meses */}
+            {/* DERECHA: evolución 12 meses (gráfico de líneas) */}
             <div className="flex flex-col">
               <div className="flex items-baseline justify-between">
-                <p className="readout font-mono">Acumulado 12 meses</p>
+                <p className="readout font-mono">Evolución · últimos 12 meses</p>
                 <p className="font-mono text-lg font-semibold tabular-nums text-ink">
-                  {ars.format(anual)}
+                  {ars.format(TOTAL_ANUAL)}
                 </p>
               </div>
 
-              {/* Grafico de barras (una serie). */}
+              {/* Gráfico de líneas (una serie, acumulado). */}
               <div className="mt-5 flex-1">
                 <div className="relative h-[230px]">
-                  {/* Gridlines recesivas + labels de techo */}
-                  {[0, 25, 50, 75].map((p) => (
+                  {/* Gridlines recesivas + label de techo */}
+                  {[0, 25, 50, 75].map((pct) => (
                     <div
-                      key={p}
+                      key={pct}
                       aria-hidden="true"
                       className="absolute inset-x-0 border-t border-chrome/70"
-                      style={{ top: `${p}%` }}
+                      style={{ top: `${pct}%` }}
                     />
                   ))}
                   <span className="absolute right-0 top-0 -translate-y-1/2 bg-tile pl-2 font-mono text-[10px] text-slate">
-                    {compact(ceil)}
+                    {compact(CEIL)}
                   </span>
 
-                  {/* Barras */}
-                  <div className="absolute inset-0 flex items-end gap-[5px] border-b border-slate/60 sm:gap-[7px]">
-                    {MESES.map((m, i) => {
-                      const acc = neto * (i + 1);
-                      const pct = Math.max(1, (acc / ceil) * 100);
-                      const last = i === 11;
-                      return (
-                        <div
-                          key={i}
-                          className="group relative flex h-full flex-1 items-end"
-                        >
-                          <div
-                            className="w-full rounded-t-[3px] bg-ink transition-[height] duration-500 ease-out group-hover:bg-ink/85"
-                            style={{ height: `${pct}%` }}
-                          />
-                          {/* Label directo solo en la ultima barra */}
-                          {last && (
-                            <span
-                              className="absolute left-1/2 -translate-x-1/2 whitespace-nowrap font-mono text-[11px] font-semibold text-ink transition-[bottom] duration-500 ease-out"
-                              style={{ bottom: `calc(${pct}% + 6px)` }}
-                            >
-                              {compact(acc)}
-                            </span>
-                          )}
-                          {/* Tooltip por barra */}
-                          <span
-                            className="pointer-events-none absolute left-1/2 z-10 hidden -translate-x-1/2 whitespace-nowrap rounded-[3px] bg-ink px-2 py-1 font-mono text-[10px] text-tile group-hover:block"
-                            style={{ bottom: `calc(${pct}% + 8px)` }}
-                            role="status"
-                          >
-                            Mes {i + 1} · {ars.format(acc)}
-                          </span>
-                        </div>
-                      );
-                    })}
+                  <div className="absolute inset-0 border-b border-slate/60">
+                    <svg
+                      viewBox={`0 0 ${CW} ${CH}`}
+                      preserveAspectRatio="none"
+                      className="h-full w-full overflow-visible"
+                      aria-hidden="true"
+                    >
+                      {/* Track completo (recesivo) */}
+                      <polyline
+                        points={trackPts}
+                        fill="none"
+                        stroke="var(--color-chrome)"
+                        strokeWidth={1.5}
+                        vectorEffect="non-scaling-stroke"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                      {/* Área bajo la parte dibujada */}
+                      <path d={drawnArea} fill="var(--color-ink)" opacity={0.06} />
+                      {/* Línea dibujada hasta el playhead */}
+                      <path
+                        d={drawnLine}
+                        fill="none"
+                        stroke="var(--color-ink)"
+                        strokeWidth={2.5}
+                        vectorEffect="non-scaling-stroke"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                      {/* Punto que avanza */}
+                      <circle
+                        cx={xEnd}
+                        cy={yEnd}
+                        r={3}
+                        fill="var(--color-stamp)"
+                        vectorEffect="non-scaling-stroke"
+                      />
+                    </svg>
                   </div>
                 </div>
 
                 {/* Meses */}
-                <div className="mt-2 flex gap-[5px] sm:gap-[7px]" aria-hidden="true">
+                <div className="mt-2 flex" aria-hidden="true">
                   {MESES.map((m, i) => (
                     <span
                       key={i}
@@ -259,8 +330,8 @@ export function Calculator() {
                   ))}
                 </div>
                 <p className="sr-only">
-                  Acumulado neto a 12 meses: {ars.format(anual)}. Neto mensual:{" "}
-                  {ars.format(neto)}.
+                  Evolución del neto acumulado a 12 meses. Total anual:{" "}
+                  {ars.format(TOTAL_ANUAL)}.
                 </p>
               </div>
 
