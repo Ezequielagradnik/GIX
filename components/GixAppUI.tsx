@@ -17,7 +17,7 @@ export function PhoneFrame({
   codigo?: string;
 }) {
   return (
-    <div className="w-fit rounded-[44px] bg-ink p-[10px] shadow-[0_30px_60px_-30px_rgba(22,25,26,0.6)]">
+    <div className="w-fit rounded-[42px] bg-ink p-[7px] shadow-[0_30px_60px_-30px_rgba(22,25,26,0.6)]">
       <GixAppUI saldo={saldo} codigo={codigo} />
     </div>
   );
