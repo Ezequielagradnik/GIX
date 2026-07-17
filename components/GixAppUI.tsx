@@ -92,6 +92,11 @@ export function GixAppUI({
         <div className="mt-3 rounded-[10px] bg-ink py-[14px] text-center">
           <span className="font-display text-[15px] text-tile">Mostrar QR</span>
         </div>
+        <p className="mt-4 text-center">
+          <span className="font-mono text-[13px] text-ink underline underline-offset-[3px]">
+            Enviar consumo a 1 amigo
+          </span>
+        </p>
       </div>
 
       {/* Detalle del plan */}
