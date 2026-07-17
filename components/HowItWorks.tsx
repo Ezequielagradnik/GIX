@@ -70,6 +70,18 @@ function PlanTicket() {
           <span className="font-semibold">{v}</span>
         </div>
       ))}
+      <hr className="ticket-rule" />
+      <div className="px-5 pb-1 pt-2.5">
+        <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-slate">
+          ¿Qué incluye?
+        </p>
+        <p className="mt-1.5 font-mono text-[11px] font-semibold text-ink">
+          Café + medialuna
+        </p>
+        <p className="mt-0.5 font-mono text-[11px] text-slate">
+          De lunes a jueves, de 10 a 17 h
+        </p>
+      </div>
     </div>
   );
 }
