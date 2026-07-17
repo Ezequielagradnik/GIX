@@ -17,6 +17,7 @@ type Status = "idle" | "sending" | "done" | "error";
 export function Waitlist() {
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState<string | null>(null);
+  const [rubro, setRubro] = useState("");
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -38,6 +39,7 @@ export function Waitlist() {
       }
       setStatus("done");
       form.reset();
+      setRubro("");
     } catch (err) {
       setStatus("error");
       setError(err instanceof Error ? err.message : "Algo salió mal.");
@@ -89,7 +91,8 @@ export function Waitlist() {
                   id="rubro"
                   name="rubro"
                   required
-                  defaultValue=""
+                  value={rubro}
+                  onChange={(e) => setRubro(e.target.value)}
                   className="w-full border border-chrome bg-tile px-4 py-3 font-body text-ink focus-visible:border-ink"
                 >
                   <option value="" disabled>
@@ -102,6 +105,14 @@ export function Waitlist() {
                   ))}
                 </select>
               </div>
+              {rubro === "Otro" && (
+                <Field
+                  label="¿Qué rubro?"
+                  name="rubroOtro"
+                  placeholder="Contanos tu rubro"
+                  required
+                />
+              )}
               <Field
                 label="WhatsApp"
                 name="whatsapp"
