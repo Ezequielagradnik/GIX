@@ -18,7 +18,7 @@ const STEPS = [
   {
     n: "01",
     title: "Creás el plan",
-    body: "Definís cuántos consumos, el precio y el tope por día. Dos minutos.",
+    body: "Definís el nombre del plan, la cantidad de consumos, el precio, la frecuencia de pago, el límite diario, los regalos incluidos, la duración de la suscripción, los días y horarios de uso y la fecha de facturación. Todo en pocos minutos.",
   },
   {
     n: "02",
