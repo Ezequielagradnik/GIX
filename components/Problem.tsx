@@ -21,21 +21,21 @@ type Item = {
 const ITEMS: Item[] = [
   {
     n: "01",
-    problema: "No sabés cuánto vas a facturar.",
-    solucion: "Cobrás el 1, pase lo que pase.",
-    detalle: "50 suscriptores × $30.000 = $1.500.000 por adelantado.",
+    problema: "Demanda impredecible. No sabés un mínimo de cuánto vas a ganar.",
+    solucion: "Cobrás por adelantado.",
+    detalle: "Empezás el mes con ingresos ya asegurados.",
   },
   {
     n: "02",
-    problema: "El cliente que viene 4 veces por semana no vale más que el que viene una.",
-    solucion: "El frecuente paga membresía.",
-    detalle: "Plan Café: $30.000/mes · 30 cafés · máx. 2 por día.",
+    problema: "Fidelización. Conseguir un cliente cuesta. Perderlo, un segundo.",
+    solucion: "Tus clientes vuelven y consumen más.",
+    detalle: "Con el sistema de regalos, atraen nuevos clientes.",
   },
   {
     n: "03",
-    problema: "Tu tarjeta de sellos es un papelito que nadie mira.",
-    solucion: "El saldo vive en su teléfono.",
-    detalle: "QR en el mostrador. Código de 6 dígitos en caja. Sin papel.",
+    problema: "Tu relación con el cliente termina cuando termina la venta.",
+    solucion: "La venta pasa a ser el principio de la relación.",
+    detalle: "Tu cliente vuelve una y otra vez, todos los meses.",
   },
 ];
 
