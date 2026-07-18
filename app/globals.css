@@ -253,6 +253,20 @@ body {
   margin: 0;
 }
 
+/* LED de standby de la impresora del precio. */
+.gix-led {
+  animation: gix-led 1.5s ease-in-out infinite;
+}
+@keyframes gix-led {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
 /* ---- Fichas del problema (flip mecanico, mismo gesto que el
         split-flap del hero) ---- */
 .pcard {
