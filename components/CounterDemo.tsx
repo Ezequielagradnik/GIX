@@ -12,9 +12,11 @@ export function CounterDemo() {
           <h2 className="font-display text-ink text-[clamp(1.8rem,4vw,2.8rem)] leading-tight">
             Mostrá tu token y empezá a consumir.
           </h2>
-          <p className="mt-3 text-slate leading-relaxed">
-            Validar el consumo lleva menos de 3 segundos. Sin hardware. Sin app
-            que instalar. Un código de 6 dígitos y listo.
+          <p className="mt-3 text-[1.125rem] leading-relaxed text-ink">
+            Validar el consumo lleva menos de 3 segundos.
+          </p>
+          <p className="mt-1.5 text-slate leading-relaxed">
+            Sin hardware. Sin app que instalar. Un código de 6 dígitos y listo.
           </p>
         </div>
 
