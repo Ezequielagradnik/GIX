@@ -23,13 +23,13 @@ const STEPS = [
   },
   {
     n: "02",
-    title: "Pegás el QR",
-    body: "Lo imprimís y lo pegás en el mostrador. El cliente se suscribe solo, desde el teléfono.",
+    title: "Recibí tu QR",
+    body: "Te damos un QR personalizado, listo para imprimir y colocar en el mostrador. Descargalo, imprimilo y empezá a sumar miembros.",
   },
   {
     n: "03",
-    title: "Cobrás todos los meses",
-    body: "El cobro se renueva automático. Vos ves cuánto entra el 1 de cada mes.",
+    title: "Tus ingresos también se vuelven recurrentes",
+    body: "Mientras tus clientes siguen disfrutando de su membresía, vos seguís cobrando todos los meses.",
   },
 ];
 
@@ -338,19 +338,43 @@ export function HowItWorks() {
             )}
           </div>
 
-          {/* DERECHA: el paso y su escena */}
-          <div className="flex min-h-[380px] flex-col p-6 sm:p-8">
-            <div key={active} className={`${reduced ? "" : "step-swap"} flex flex-1 flex-col`}>
-              <h3 className="font-display text-[clamp(1.6rem,3.4vw,2.3rem)] leading-tight text-ink">
-                {step.title}
-              </h3>
-              <p className="mt-3 max-w-[46ch] leading-relaxed text-slate">
-                {step.body}
-              </p>
-              <div className="mt-auto pt-8">
-                {active === 0 && <PlanTicket />}
-                {active === 1 && <QRPrint active />}
-                {active === 2 && <CountUp active reduced={reduced} />}
+          {/* DERECHA: el paso y su escena.
+              Los tres pasos se renderizan invisibles en la misma celda
+              del grid ("fantasmas"): fijan una única altura, la del paso
+              más alto, para que el tablero no cambie de tamaño al rotar
+              entre 01, 02 y 03. Arriba se dibuja solo el paso activo. */}
+          <div className="grid min-h-[380px] p-6 sm:p-8">
+            {STEPS.map((s, i) => (
+              <div
+                key={s.n}
+                aria-hidden="true"
+                className="invisible col-start-1 row-start-1 flex flex-col"
+              >
+                <h3 className="font-display text-[clamp(1.6rem,3.4vw,2.3rem)] leading-tight">
+                  {s.title}
+                </h3>
+                <p className="mt-3 max-w-[62ch] leading-relaxed">{s.body}</p>
+                <div className="mt-auto pt-8">
+                  {i === 0 && <PlanTicket />}
+                  {i === 1 && <QRPrint active={false} />}
+                  {i === 2 && <CountUp active={false} reduced />}
+                </div>
+              </div>
+            ))}
+
+            <div className="col-start-1 row-start-1 flex flex-col">
+              <div key={active} className={`${reduced ? "" : "step-swap"} flex flex-1 flex-col`}>
+                <h3 className="font-display text-[clamp(1.6rem,3.4vw,2.3rem)] leading-tight text-ink">
+                  {step.title}
+                </h3>
+                <p className="mt-3 max-w-[62ch] leading-relaxed text-slate">
+                  {step.body}
+                </p>
+                <div className="mt-auto pt-8">
+                  {active === 0 && <PlanTicket />}
+                  {active === 1 && <QRPrint active />}
+                  {active === 2 && <CountUp active reduced={reduced} />}
+                </div>
               </div>
             </div>
           </div>
