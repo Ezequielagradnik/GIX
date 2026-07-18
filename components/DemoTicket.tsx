@@ -13,14 +13,14 @@ const TicketApp = dynamic(() => import("./three/TicketApp"), {
   loading: () => <TicketStatic />,
 });
 
-const S = 0.82; // escala del fallback
+const S = 0.78; // escala del fallback
 
 export function TicketStatic() {
   return (
     <div className="flex h-full w-full items-center justify-center">
-      <div style={{ width: 340 * S, height: 555 * S }}>
+      <div style={{ width: 300 * S, height: 693 * S }}>
         <div className="origin-top-left" style={{ transform: `scale(${S})` }}>
-          <TerminalFrame printed />
+          <TerminalFrame mode="done" />
         </div>
       </div>
     </div>
@@ -60,7 +60,7 @@ export function DemoTicket() {
   }, []);
 
   return (
-    <div ref={ref} className="h-[520px] w-full sm:h-[560px]">
+    <div ref={ref} className="h-[560px] w-full sm:h-[620px]">
       {!ready || reduced ? <TicketStatic /> : <TicketApp printed={printed} />}
     </div>
   );

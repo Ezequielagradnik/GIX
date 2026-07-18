@@ -5,12 +5,12 @@ import { Html, RoundedBox, ContactShadows } from "@react-three/drei";
 import { Suspense, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { INK } from "./flip";
-import { TerminalFrame, TERM_W, PAPER_H } from "../TicketUI";
+import { TerminalFrame, TERM_W, TICKET_WIN_H, OVERLAP } from "../TicketUI";
 
 /* ============================================================
-   TERMINAL DE COBRO 3D (el posnet de GIX).
-   El frente (cabezal + pantalla + mentón + recibo que se imprime)
-   es UNA pieza DOM proyectada con drei Html: texto nítido y sin
+   POSNET 3D imprimiendo el ticket del precio.
+   El frente (ticket que sale + cabezal + pantalla + teclado) es
+   UNA pieza DOM proyectada con drei Html: texto nítido y sin
    desfases. El WebGL pone lo físico: cuerpo con grosor de posnet,
    botón lateral y sombra de contacto. Flota suave y sigue el
    mouse, igual que el teléfono de la demo.
@@ -19,13 +19,13 @@ import { TerminalFrame, TERM_W, PAPER_H } from "../TicketUI";
 const DF = 2;
 const PX = DF / 400; // px del DOM -> unidades de mundo
 
-// Alto estimado del cuerpo (sin la ventana del recibo).
-const DEV_H = 445;
+// Alto estimado del cuerpo de la máquina (sin la ventana del ticket).
+const DEV_H = 365;
 const BODY_W = TERM_W * PX;
 const BODY_H = DEV_H * PX;
-// El DOM completo incluye la ventana del papel arriba: su centro no
-// coincide con el centro del cuerpo; el cuerpo queda corrido abajo.
-const BODY_OFF_Y = -((PAPER_H - 10) / 2) * PX;
+// El DOM completo incluye la ventana del ticket abajo: su centro no
+// coincide con el centro del cuerpo; el cuerpo queda corrido arriba.
+const BODY_OFF_Y = ((TICKET_WIN_H - OVERLAP) / 2) * PX;
 
 function roundedRectShape(w: number, h: number, r: number) {
   const s = new THREE.Shape();
@@ -58,7 +58,7 @@ function Terminal({
   // asoma por delante; aporta grosor y silueta al rotar.
   const bodyGeo = useMemo(() => {
     const geo = new THREE.ExtrudeGeometry(
-      roundedRectShape(BODY_W * 0.965, BODY_H * 0.975, 0.15),
+      roundedRectShape(BODY_W * 0.965, BODY_H * 0.955, 0.15),
       {
         depth: 0.26,
         bevelEnabled: true,
@@ -76,13 +76,13 @@ function Terminal({
     t.current += Math.min(dt, 0.05);
     if (!g.current) return;
     const m = mouse.current;
-    const targetY = 0.14 + Math.sin(t.current * 0.5) * 0.07 + m.x * 0.16;
-    const targetX = -0.02 + Math.sin(t.current * 0.7) * 0.02 + m.y * 0.07;
+    const targetY = 0.12 + Math.sin(t.current * 0.5) * 0.06 + m.x * 0.14;
+    const targetX = -0.01 + Math.sin(t.current * 0.7) * 0.015 + m.y * 0.04;
     const k = 1 - Math.pow(0.001, dt);
     g.current.rotation.y += (targetY - g.current.rotation.y) * k;
     g.current.rotation.x += (targetX - g.current.rotation.x) * k;
-    g.current.rotation.z = Math.sin(t.current * 0.35) * 0.01;
-    g.current.position.y = Math.sin(t.current * 0.8) * 0.04;
+    g.current.rotation.z = Math.sin(t.current * 0.35) * 0.008;
+    g.current.position.y = Math.sin(t.current * 0.8) * 0.035;
   });
 
   return (
@@ -96,12 +96,12 @@ function Terminal({
       <RoundedBox
         args={[0.035, 0.3, 0.08]}
         radius={0.015}
-        position={[(BODY_W / 2) * 0.985, BODY_OFF_Y + 0.5, -0.18]}
+        position={[(BODY_W / 2) * 0.985, BODY_OFF_Y + 0.4, -0.18]}
       >
         <meshStandardMaterial color={INK} roughness={0.45} metalness={0.4} />
       </RoundedBox>
 
-      {/* Frente completo (recibo + cabezal + pantalla + mentón):
+      {/* Frente completo (ticket + cabezal + pantalla + teclado):
           una sola pieza DOM proyectada. */}
       <Html
         transform
@@ -110,7 +110,7 @@ function Terminal({
         zIndexRange={[30, 0]}
         style={{ pointerEvents: "none" }}
       >
-        <TerminalFrame printed={printed} />
+        <TerminalFrame mode={printed ? "play" : "waiting"} />
       </Html>
     </group>
   );
@@ -136,7 +136,7 @@ export default function TicketApp({ printed = false }: { printed?: boolean }) {
         shadows
         dpr={[1, 2]}
         gl={{ antialias: true, alpha: true }}
-        camera={{ position: [0.5, 0.15, 7.4], fov: 30 }}
+        camera={{ position: [0.5, 0.15, 7.1], fov: 30 }}
         onCreated={({ camera }) => camera.lookAt(0, 0, 0)}
       >
         <ambientLight intensity={0.85} />
@@ -151,7 +151,7 @@ export default function TicketApp({ printed = false }: { printed?: boolean }) {
           <Terminal printed={printed} mouse={mouse} />
         </Suspense>
         <ContactShadows
-          position={[0, -1.6, 0]}
+          position={[0, -1.85, 0]}
           opacity={0.28}
           scale={7}
           blur={2.6}
